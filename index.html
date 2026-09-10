@@ -3,7 +3,11 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="theme-color" content="#06090e"/>
 <title>Sensorless PMSM Field-Oriented Control (FOC) &amp; Inverter Digital Twin</title>
 <link href="css/style.css?v=14.0" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
@@ -131,11 +135,7 @@
         <!-- BOTTOM AREA: Trigger + Transport + 4 Mode Cards -->
         <div class="hud-bottom-area">
           <div class="hud-subrow">
-            <button class="hud-trigger-pill" id="btn-trigger-controls-drawer">
-              <span class="aocs-trigger-icon">⚡</span>
-              <span class="aocs-trigger-text"><strong>FOC DRIVE</strong> DRAWER</span>
-              <span class="aocs-trigger-arrow">›</span>
-            </button>
+            
             <div class="hud-transport-capsule">
               <button class="hud-transport-btn" id="btn-transport-step-back" title="Step Back">‹</button>
               <button class="hud-transport-btn hud-transport-pause-btn" id="btn-transport-pause">

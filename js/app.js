@@ -430,4 +430,53 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   }
+
+  // Direct pointer touch drag on vertical HUD rails
+  function attachPMSMRailDrag(container, onFracChange) {
+    if (!container) return;
+    container.style.touchAction = 'none';
+    let dragging = false;
+    const handleDrag = (e) => {
+      const rect = container.getBoundingClientRect();
+      const frac = Math.max(0, Math.min(1, (rect.bottom - e.clientY) / rect.height));
+      onFracChange(frac);
+    };
+    container.addEventListener('pointerdown', (e) => {
+      dragging = true;
+      container.setPointerCapture?.(e.pointerId);
+      handleDrag(e);
+    });
+    container.addEventListener('pointermove', (e) => {
+      if (dragging) handleDrag(e);
+    });
+    const stopDrag = (e) => {
+      if (dragging) {
+        dragging = false;
+        try { container.releasePointerCapture?.(e.pointerId); } catch (_) {}
+      }
+    };
+    container.addEventListener('pointerup', stopDrag);
+    container.addEventListener('pointercancel', stopDrag);
+  }
+
+  const speedRailTrack = document.querySelector('.hud-left-rail .hud-rail-track-container');
+  attachPMSMRailDrag(speedRailTrack, (frac) => {
+    const val = Math.round(100 + frac * 1900);
+    if (dSpeed) {
+      dSpeed.value = val;
+      dSpeed.dispatchEvent(new Event('input', { bubbles: true }));
+      updateSpeedHUD(val);
+    }
+  });
+
+  const torqueRailTrack = document.querySelector('.hud-right-rail .hud-rail-track-container');
+  attachPMSMRailDrag(torqueRailTrack, (frac) => {
+    const val = (frac * 15).toFixed(1);
+    if (dTorque) {
+      dTorque.value = val;
+      dTorque.dispatchEvent(new Event('input', { bubbles: true }));
+      updateTorqueHUD(val);
+    }
+  });
+
 })();
