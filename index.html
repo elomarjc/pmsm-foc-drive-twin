@@ -15,11 +15,12 @@
         <div>
             <div class="brand-title">
                 <span>PMSM Field-Oriented Control (FOC) Digital Twin</span>
-                <span class="brand-badge">Danfoss Drives Architecture</span>
+                <span class="brand-badge">Variable Frequency Inverter Architecture</span>
             </div>
             <p class="brand-subtitle">Industrial Variable Speed Drive: Decoupled dq Vector Control, Space Vector PWM & Sensorless Sliding Mode Observer</p>
         </div>
         <div class="header-controls">
+            <button id="guideBtn" class="btn-guide">📖 How to Use & Problem Solved</button>
             <a href="https://github.com/elomarjc/pmsm-foc-drive-twin" target="_blank" class="btn-link">GitHub Source</a>
         </div>
     </header>
@@ -157,9 +158,95 @@
     <!-- Footer -->
     <footer style="text-align: center; padding: 20px; font-size: 0.8rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: 20px;">
         Designed & Implemented by <strong>Jacob El-Omar</strong> | Aalborg University — Bachelor's Project in Electronic Engineering<br>
-        Targeting Danfoss Drives Power Electronics R&D in Gråsten & Kolding
+        Inspired by modern Variable Frequency Drives (VFD) & Power Electronics R&D
     </footer>
 
     <script type="module" src="js/app.js"></script>
+
+    <!-- Interactive Guide & Problem Overview Modal -->
+    <div id="guideModal" class="guide-modal-overlay">
+        <div class="guide-modal-card">
+            <div class="guide-modal-header">
+                <h2>⚡ PMSM Field-Oriented Control (FOC) Drive Twin</h2>
+                <button id="guideClose" class="guide-modal-close" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="guide-modal-body">
+                <div class="guide-section">
+                    <h3>🎯 The Industrial Problem Solved</h3>
+                    <p>Permanent Magnet Synchronous Motors (PMSMs) deliver high power density in industrial manufacturing, electric vehicles, and pumps. Achieving high efficiency requires decoupled control of magnetic flux (id = 0) and torque (iq). However, optical shaft encoders commonly fail in harsh factory environments (vibration, heat, dust). Variable frequency drive engineers need sensorless control algorithms to reconstruct rotor position from electrical measurements.</p>
+                </div>
+
+                <div class="guide-section">
+                    <h3>💡 How This Digital Twin Solves It</h3>
+                    <p>Models 3-phase PMSM electro-mechanical dynamics, Clarke and Park vector transformations, Space Vector PWM (SVPWM) with 7-segment sector duty-cycle switching, inverter dead-time harmonic compensation, and a sensorless Sliding Mode Observer (SMO) that reconstructs back-EMF.</p>
+                </div>
+
+                <div class="guide-section">
+                    <h3>🕹️ Interactive Quickstart Tutorial (Try This Now!)</h3>
+                    <ul class="guide-step-list">
+                    <li class="guide-step-item">
+                        <span class="guide-step-num">1</span>
+                        <div class="guide-step-content">
+                            <strong>Speed Regulation & Decoupled Torque:</strong> Adjust Target Speed (e.g. 1,500 RPM) and observe how the Vector Scope pins direct-axis flux to id = 0 A while torque current iq responds to load.
+                        </div>
+                    </li>
+                    <li class="guide-step-item">
+                        <span class="guide-step-num">2</span>
+                        <div class="guide-step-content">
+                            <strong>Space Vector PWM Switching:</strong> In the center SVPWM hexagon scope, observe the voltage vector transition through sectors S1–S6; toggle Active Dead-Time Compensation to see 5th/7th current harmonics drop by -18 dB.
+                        </div>
+                    </li>
+                    <li class="guide-step-item">
+                        <span class="guide-step-num">3</span>
+                        <div class="guide-step-content">
+                            <strong>Sensorless SMO Feedback:</strong> Toggle Sensorless Feedback Mode (SMO) ON: the drive disconnects the physical encoder and tracks rotor angle purely via the sliding mode back-EMF observer with &lt;2.5° error.
+                        </div>
+                    </li>
+                    </ul>
+                </div>
+
+                <div class="guide-section">
+                    <h3>📊 Telemetry & Control Glossary</h3>
+                    <ul style="padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem;">
+                        <li><strong>Clarke & Park Transforms:</strong> Vector transformations that convert 3-phase stationary stator currents (ia, ib, ic) into a 2-phase rotating reference frame (id, iq) synchronized with the rotor magnetic field.</li><li><strong>SVPWM (Space Vector PWM):</strong> Digital switching technique that generates inverter gating pulses from 8 fundamental voltage vectors, delivering 15.5% higher DC-bus voltage utilization than sinusoidal PWM.</li><li><strong>Sliding Mode Observer (SMO):</strong> Non-linear state observer that forces current estimation errors onto a sliding manifold to reconstruct motor back-EMF and rotor angle without shaft sensors.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="guide-modal-footer">
+                <button id="guideStart" class="btn-guide-start">🚀 Start Interactive Simulator</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Toggle Script -->
+    <script>
+        (function() {
+            const guideBtn = document.getElementById('guideBtn');
+            const guideModal = document.getElementById('guideModal');
+            const guideClose = document.getElementById('guideClose');
+            const guideStart = document.getElementById('guideStart');
+
+            function openModal() { if (guideModal) guideModal.classList.add('active'); }
+            function closeModal() { if (guideModal) guideModal.classList.remove('active'); }
+
+            if (guideBtn) guideBtn.addEventListener('click', openModal);
+            if (guideClose) guideClose.addEventListener('click', closeModal);
+            if (guideStart) guideStart.addEventListener('click', closeModal);
+            if (window.location.search.indexOf('guide') !== -1) openModal();
+
+            if (guideModal) {
+                guideModal.addEventListener('click', function(e) {
+                    if (e.target === guideModal) closeModal();
+                });
+            }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && guideModal && guideModal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+        })();
+    </script>
+
 </body>
 </html>
