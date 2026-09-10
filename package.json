@@ -1,0 +1,11 @@
+{
+  "name": "pmsm-foc-drive-twin",
+  "version": "1.0.0",
+  "description": "Sensorless PMSM Field-Oriented Control (FOC) & Inverter Digital Twin with SVPWM and Sliding Mode Observer",
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/test_foc_drive.mjs"
+  },
+  "author": "Jacob El-Omar",
+  "license": "MIT"
+}

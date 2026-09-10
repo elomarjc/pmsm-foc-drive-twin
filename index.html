@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sensorless PMSM Field-Oriented Control (FOC) & Inverter Digital Twin</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header">
+        <div>
+            <div class="brand-title">
+                <span>PMSM Field-Oriented Control (FOC) Digital Twin</span>
+                <span class="brand-badge">Danfoss Drives Architecture</span>
+            </div>
+            <p class="brand-subtitle">Industrial Variable Speed Drive: Decoupled dq Vector Control, Space Vector PWM & Sensorless Sliding Mode Observer</p>
+        </div>
+        <div class="header-controls">
+            <a href="https://github.com/elomarjc/pmsm-foc-drive-twin" target="_blank" class="btn-link">GitHub Source</a>
+        </div>
+    </header>
+
+    <!-- Telemetry Status Bar -->
+    <section class="status-bar">
+        <div class="status-item">
+            <span class="status-label">Rotor Speed:</span>
+            <span id="telemSpeed" class="status-val">1500 RPM</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Electromagnetic Torque:</span>
+            <span id="telemTorque" class="status-val">5.0 Nm</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">SMO Observer Tracking:</span>
+            <span id="telemSmoErr" class="status-pill success">Δθ: 1.2°</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Control Mode:</span>
+            <span id="telemMode" class="status-val">ENCODER CLOSED-LOOP</span>
+        </div>
+    </section>
+
+    <!-- Main Dashboard Grid -->
+    <main class="dashboard-grid">
+        <!-- 1. Clarke / Park Vector Space Scope -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🔄 Vector Space Scope (Clarke / Park)</span>
+                <span style="font-size: 0.75rem; color: #38bdf8;">dq Decoupling</span>
+            </div>
+            <div class="card-body">
+                <div class="canvas-container">
+                    <canvas id="vectorCanvas" width="420" height="280"></canvas>
+                </div>
+                <div class="control-row">
+                    <span>Direct Axis: Flux Control (id* = 0)</span>
+                    <span>Quadrature Axis: Torque (iq)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SVPWM Voltage Hexagon Scope -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">⚡ Space Vector PWM (SVPWM) Hexagon</span>
+                <span style="font-size: 0.75rem; color: #10b981;">6 Sectors | 10 kHz</span>
+            </div>
+            <div class="card-body">
+                <div class="canvas-container">
+                    <canvas id="hexagonCanvas" width="420" height="280"></canvas>
+                </div>
+                <div class="control-row">
+                    <span>Linear Modulation Limit: Vdc / √3</span>
+                    <span>7-Segment Center-Aligned PWM</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Stator Current Harmonic FFT -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">📊 Current Harmonics & Dead-Time FFT</span>
+                <span style="font-size: 0.75rem; color: #f59e0b;">5th & 7th Distortion</span>
+            </div>
+            <div class="card-body">
+                <div class="canvas-container">
+                    <canvas id="fftCanvas" width="420" height="200"></canvas>
+                </div>
+                <div class="control-row">
+                    <span>Active Dead-Time Compensation:</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="deadTimeToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Drive Parameter Controls -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">🎛️ Speed Regulation & Disturbance Injection</span>
+                <span style="font-size: 0.75rem; color: #ec4899;">VLT / VACON Tuning</span>
+            </div>
+            <div class="card-body">
+                <div class="control-row">
+                    <span>Target Speed (RPM):</span>
+                    <div class="slider-with-val">
+                        <input type="range" id="speedSlider" min="100" max="2000" step="50" value="1500">
+                        <span id="speedVal" class="slider-val-readout">1500 RPM</span>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <span>Load Torque Disturbance TL (Nm):</span>
+                    <div class="slider-with-val">
+                        <input type="range" id="torqueSlider" min="0" max="18" step="0.5" value="5.0">
+                        <span id="torqueVal" class="slider-val-readout">5.0 Nm</span>
+                    </div>
+                </div>
+
+                <div class="control-row">
+                    <span>Sensorless Feedback Mode (SMO):</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="sensorlessToggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div class="control-row">
+                    <span>Load Impact Transient:</span>
+                    <button id="stepLoadBtn" class="btn-action">⚡ Inject +10 Nm Step Load</button>
+                </div>
+
+                <div style="background: #090e18; border: 1px solid #1e293b; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #94a3b8;">
+                    <strong>Sensorless Sliding Mode Observer:</strong> Reconstructs back-EMF vectors without mechanical encoders. Toggle sensorless feedback to drive the motor entirely via back-EMF flux estimation.
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Speed Tracking & Torque Dynamics Strip-Chart -->
+        <div class="card" style="grid-column: 1 / -1;">
+            <div class="card-header">
+                <span class="card-title">📈 Dynamic Telemetry: Speed Tracking & Electromagnetic Torque Transient</span>
+                <span style="font-size: 0.75rem; color: #38bdf8;">60 FPS Real-Time Trace</span>
+            </div>
+            <div class="card-body">
+                <canvas id="chartCanvas" width="920" height="230"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 20px; font-size: 0.8rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: 20px;">
+        Designed & Implemented by <strong>Jacob El-Omar</strong> | Aalborg University — Bachelor's Project in Electronic Engineering<br>
+        Targeting Danfoss Drives Power Electronics R&D in Gråsten & Kolding
+    </footer>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
