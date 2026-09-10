@@ -53,9 +53,129 @@
 <span style="font-size: 0.75rem; color: #38bdf8;">dq Decoupling</span>
 <span class="live-screen-indicator">LIVE MONITOR</span></div>
 <div class="card-body">
-<div class="canvas-container">
+<div class="hud-visualizer-container">
+          <div class="canvas-container">
 <canvas height="280" id="vectorCanvas" width="420"></canvas>
 </div>
+          
+      <!-- FLOATING HUD PERIMETER CONTROLS OVERLAY (MOBILE) -->
+      <div class="hud-overlay-layer">
+        <!-- TOP ROW: Status Pills & Action Buttons -->
+        <div class="hud-top-bar">
+          <div class="hud-pills-left">
+            <div class="hud-pill-select-wrap">
+              <span class="hud-pill-tag">MODE</span>
+              <span class="hud-status-text" id="hud-mode-indicator">dq DECOUPLED</span>
+            </div>
+            <div class="hud-status-pill">
+              <span class="hud-dot-active">●</span> <span id="hud-status-summary">10 kHz SVPWM</span>
+            </div>
+          </div>
+          <div class="hud-buttons-right">
+            <button class="hud-circle-btn" id="btn-hud-menu" title="Guided Tour">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+              </svg>
+            </button>
+            <button class="hud-circle-btn" id="btn-hud-settings" title="Drive Parameters & Drawer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+              </svg>
+            </button>
+            <button class="hud-circle-btn" id="btn-hud-fullscreen" title="Toggle Fullscreen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- LEFT VERTICAL RAIL: Target Speed (100 to 2000 RPM) -->
+        <div class="hud-vertical-rail hud-rail-left">
+          <div class="hud-rail-header">
+            <span class="hud-rail-icon">⚡</span>
+            <span class="hud-rail-label">SPEED</span>
+            <span class="hud-rail-sub">RPM</span>
+          </div>
+          <div class="hud-rail-track-container">
+            <div class="hud-rail-track">
+              <div class="hud-rail-fill" id="rail-fill-speed" style="height: 73.6%;"></div>
+              <input type="range" id="slider-speed-vertical" class="hud-rail-range" min="100" max="2000" step="50" value="1500">
+            </div>
+          </div>
+          <div class="hud-rail-value-badge" id="hud-speed-val">1500 RPM</div>
+        </div>
+
+        <!-- RIGHT VERTICAL RAIL: Load Torque (0 to 18 Nm) -->
+        <div class="hud-vertical-rail hud-rail-right">
+          <div class="hud-rail-header">
+            <span class="hud-rail-icon">⚙️</span>
+            <span class="hud-rail-label">TORQUE</span>
+            <span class="hud-rail-sub">LOAD TL</span>
+          </div>
+          <div class="hud-rail-track-container">
+            <div class="hud-rail-track">
+              <div class="hud-rail-fill" id="rail-fill-torque" style="height: 27.7%;"></div>
+              <input type="range" id="slider-torque-vertical" class="hud-rail-range" min="0" max="18" step="0.5" value="5.0">
+            </div>
+          </div>
+          <div class="hud-rail-value-badge" id="hud-torque-val">5.0 Nm</div>
+          <button class="hud-rail-action-btn" id="btn-rail-pause" title="Pause / Resume">
+            <span id="rail-pause-icon">⏸</span>
+          </button>
+        </div>
+
+        <!-- BOTTOM AREA: Trigger + Transport + 4 Mode Cards -->
+        <div class="hud-bottom-area">
+          <div class="hud-subrow">
+            <button class="hud-trigger-pill" id="btn-trigger-controls-drawer">
+              <span class="aocs-trigger-icon">⚡</span>
+              <span class="aocs-trigger-text"><strong>FOC DRIVE</strong> DRAWER</span>
+              <span class="aocs-trigger-arrow">›</span>
+            </button>
+            <div class="hud-transport-capsule">
+              <button class="hud-transport-btn" id="btn-transport-step-back" title="Step Back">‹</button>
+              <button class="hud-transport-btn hud-transport-pause-btn" id="btn-transport-pause">
+                <span id="hud-pause-icon">⏸</span> <span id="hud-pause-text">PAUSE</span>
+              </button>
+              <button class="hud-transport-btn" id="btn-transport-step-fwd" title="Step Forward">›</button>
+            </div>
+          </div>
+
+          <!-- 4 MODE CARDS -->
+          <div class="hud-mode-cards-grid">
+            <button class="hud-mode-card active" id="hud-mode-nominal">
+              <div class="mode-card-header">
+                <span class="mode-card-title">⚡ NOMINAL</span>
+              </div>
+              <span class="mode-card-desc">1500 RPM Steady</span>
+            </button>
+            <button class="hud-mode-card" id="hud-mode-stepload">
+              <div class="mode-card-header">
+                <span class="mode-card-title">💥 STEP LOAD</span>
+              </div>
+              <span class="mode-card-desc">+10 Nm Impact</span>
+            </button>
+            <button class="hud-mode-card" id="hud-mode-smo">
+              <div class="mode-card-header">
+                <span class="mode-card-title">🌀 SMO MODE</span>
+              </div>
+              <span class="mode-card-desc">Sensorless Observer</span>
+            </button>
+            <button class="hud-mode-card" id="hud-mode-deadtime">
+              <div class="mode-card-header">
+                <span class="mode-card-title">🛡️ DEAD-TIME</span>
+              </div>
+              <span class="mode-card-desc">VSI Inverter Comp</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+        </div>
 <div class="control-row">
 <span>Direct Axis: Flux Control (id* = 0)</span>
 <span>Quadrature Axis: Torque (iq)</span>
@@ -66,15 +186,17 @@
 <!-- 3. Stator Current Harmonic FFT -->
 <!-- 4. Drive Parameter Controls -->
 <!-- 5. Speed Tracking & Torque Dynamics Strip-Chart -->
-<div class="mobile-controls-pane mobile-drawer-pane"><div class="mobile-drawer-header" id="mobileDrawerHeader">
-<div class="drawer-title-group">
-<span style="font-size: 1.1rem;">🎛️</span>
-<span class="drawer-badge">FOC MOTOR CONTROLS</span>
-</div>
-<div class="drawer-toggle-btn" id="drawerToggleBtn">
-<span id="drawerToggleText">▲ OPEN CONTROLS</span>
-</div>
-</div><div class="mobile-drawer-body" id="mobileDrawerBody"><div class="card">
+<!-- TELEMETRY BACKDROP & SLIDE-OVER DRAWER -->
+<div class="telemetry-backdrop" id="telemetryBackdrop"></div>
+<aside class="telemetry-drawer" id="telemetryDrawer">
+  <div class="telemetry-drawer-header">
+    <div class="drawer-title-group">
+      <span style="font-size: 1.1rem;">⚡</span>
+      <span class="drawer-badge">FOC MOTOR CONTROLS</span>
+    </div>
+    <button class="drawer-close-btn" id="btn-close-telemetry">✕ CLOSE</button>
+  </div>
+  <div class="telemetry-drawer-content"><div class="card">
 <div class="card-header">
 <span class="card-title">⚡ Space Vector PWM (SVPWM) Hexagon</span>
 <span style="font-size: 0.75rem; color: #10b981;">6 Sectors | 10 kHz</span>
@@ -140,7 +262,9 @@
 <strong>Sensorless Sliding Mode Observer:</strong> Reconstructs back-EMF vectors without mechanical encoders. Toggle sensorless feedback to drive the motor entirely via back-EMF flux estimation.
                 </div>
 </div>
-</div><div class="card" style="grid-column: 1 / -1;">
+  </div>
+</aside>
+<div class="card" style="grid-column: 1 / -1;">
 <div class="card-header">
 <span class="card-title">📈 Dynamic Telemetry: Speed Tracking &amp; Electromagnetic Torque Transient</span>
 <span style="font-size: 0.75rem; color: #38bdf8;">60 FPS Real-Time Trace</span>
@@ -154,6 +278,7 @@
         Designed &amp; Implemented by <strong>Jacob El-Omar</strong> | Aalborg University — Bachelor's Project in Electronic Engineering<br/>
         Inspired by modern Variable Frequency Drives (VFD) &amp; Power Electronics R&amp;D
     </footer>
+
 <script src="js/app.js" type="module"></script>
 <div class="guide-modal-footer">
 <button class="btn-guide-start" id="guideStart">🚀 Start Interactive Simulator</button>
