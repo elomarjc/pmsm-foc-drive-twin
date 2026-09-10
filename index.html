@@ -1,184 +1,160 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sensorless PMSM Field-Oriented Control (FOC) & Inverter Digital Twin</title>
-    <link rel="stylesheet" href="css/style.css?v=5.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sensorless PMSM Field-Oriented Control (FOC) &amp; Inverter Digital Twin</title>
+<link href="css/style.css?v=8.0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;600&amp;display=swap" rel="stylesheet"/>
 </head>
 <body>
-    <!-- App Header -->
-    <header class="app-header">
-        <div>
-            <div class="brand-title">
-                <span>PMSM Field-Oriented Control (FOC) Digital Twin</span>
-                <span class="brand-badge">Variable Frequency Inverter Architecture</span>
-            </div>
-            <p class="brand-subtitle">Industrial Variable Speed Drive: Decoupled dq Vector Control, Space Vector PWM & Sensorless Sliding Mode Observer</p>
-        </div>
-        <div class="header-controls">
-            <button id="guideBtn" class="btn-guide">🎮 Guided Tour</button>
-            <a href="https://github.com/elomarjc/pmsm-foc-drive-twin" target="_blank" class="btn-link">GitHub Source</a>
-        </div>
-    </header>
+<!-- App Header -->
+<header class="app-header">
+<div>
+<div class="brand-title">
+<span>PMSM Field-Oriented Control (FOC) Digital Twin</span>
+<span class="brand-badge">Variable Frequency Inverter Architecture</span>
+</div>
+<p class="brand-subtitle">Industrial Variable Speed Drive: Decoupled dq Vector Control, Space Vector PWM &amp; Sensorless Sliding Mode Observer</p>
+</div>
+<div class="header-controls">
+<button class="btn-guide" id="guideBtn">🎮 Guided Tour</button>
+<a class="btn-link" href="https://github.com/elomarjc/pmsm-foc-drive-twin" target="_blank">GitHub Source</a>
+</div>
+</header>
+<!-- Telemetry Status Bar -->
+<section class="status-bar">
+<div class="status-item">
+<span class="status-label">Rotor Speed:</span>
+<span class="status-val" id="telemSpeed">1500 RPM</span>
+</div>
+<div class="status-item">
+<span class="status-label">Electromagnetic Torque:</span>
+<span class="status-val" id="telemTorque">5.0 Nm</span>
+</div>
+<div class="status-item">
+<span class="status-label">SMO Observer Tracking:</span>
+<span class="status-pill success" id="telemSmoErr">Δθ: 1.2°</span>
+</div>
+<div class="status-item">
+<span class="status-label">Control Mode:</span>
+<span class="status-val" id="telemMode">ENCODER CLOSED-LOOP</span>
+</div>
+</section>
+<!-- Main Dashboard Grid -->
+<main class="dashboard-grid">
+<!-- 1. Clarke / Park Vector Space Scope -->
+<div class="card live-sticky-screen">
+<div class="card-header">
+<span class="card-title">🔄 Vector Space Scope (Clarke / Park)</span>
+<span style="font-size: 0.75rem; color: #38bdf8;">dq Decoupling</span>
+<span class="live-screen-indicator">LIVE MONITOR</span></div>
+<div class="card-body">
+<div class="canvas-container">
+<canvas height="280" id="vectorCanvas" width="420"></canvas>
+</div>
+<div class="control-row">
+<span>Direct Axis: Flux Control (id* = 0)</span>
+<span>Quadrature Axis: Torque (iq)</span>
+</div>
+</div>
+</div>
+<!-- 2. SVPWM Voltage Hexagon Scope -->
 
-    <!-- Telemetry Status Bar -->
-    <section class="status-bar">
-        <div class="status-item">
-            <span class="status-label">Rotor Speed:</span>
-            <span id="telemSpeed" class="status-val">1500 RPM</span>
-        </div>
-        <div class="status-item">
-            <span class="status-label">Electromagnetic Torque:</span>
-            <span id="telemTorque" class="status-val">5.0 Nm</span>
-        </div>
-        <div class="status-item">
-            <span class="status-label">SMO Observer Tracking:</span>
-            <span id="telemSmoErr" class="status-pill success">Δθ: 1.2°</span>
-        </div>
-        <div class="status-item">
-            <span class="status-label">Control Mode:</span>
-            <span id="telemMode" class="status-val">ENCODER CLOSED-LOOP</span>
-        </div>
-    </section>
+<!-- 3. Stator Current Harmonic FFT -->
 
-    <!-- Main Dashboard Grid -->
-    <main class="dashboard-grid">
-        <!-- 1. Clarke / Park Vector Space Scope -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">🔄 Vector Space Scope (Clarke / Park)</span>
-                <span style="font-size: 0.75rem; color: #38bdf8;">dq Decoupling</span>
-            </div>
-            <div class="card-body">
-                <div class="canvas-container">
-                    <canvas id="vectorCanvas" width="420" height="280"></canvas>
-                </div>
-                <div class="control-row">
-                    <span>Direct Axis: Flux Control (id* = 0)</span>
-                    <span>Quadrature Axis: Torque (iq)</span>
-                </div>
-            </div>
-        </div>
+<!-- 4. Drive Parameter Controls -->
 
-        <!-- 2. SVPWM Voltage Hexagon Scope -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">⚡ Space Vector PWM (SVPWM) Hexagon</span>
-                <span style="font-size: 0.75rem; color: #10b981;">6 Sectors | 10 kHz</span>
-            </div>
-            <div class="card-body">
-                <div class="canvas-container">
-                    <canvas id="hexagonCanvas" width="420" height="280"></canvas>
-                </div>
-                <div class="control-row">
-                    <span>Linear Modulation Limit: Vdc / √3</span>
-                    <span>7-Segment Center-Aligned PWM</span>
-                </div>
-            </div>
-        </div>
+<!-- 5. Speed Tracking & Torque Dynamics Strip-Chart -->
 
-        <!-- 3. Stator Current Harmonic FFT -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">📊 Current Harmonics & Dead-Time FFT</span>
-                <span style="font-size: 0.75rem; color: #f59e0b;">5th & 7th Distortion</span>
-            </div>
-            <div class="card-body">
-                <div class="canvas-container">
-                    <canvas id="fftCanvas" width="420" height="200"></canvas>
+<div class="mobile-controls-pane"><div class="card">
+<div class="card-header">
+<span class="card-title">⚡ Space Vector PWM (SVPWM) Hexagon</span>
+<span style="font-size: 0.75rem; color: #10b981;">6 Sectors | 10 kHz</span>
+</div>
+<div class="card-body">
+<div class="canvas-container">
+<canvas height="280" id="hexagonCanvas" width="420"></canvas>
+</div>
+<div class="control-row">
+<span>Linear Modulation Limit: Vdc / √3</span>
+<span>7-Segment Center-Aligned PWM</span>
+</div>
+</div>
+</div><div class="card">
+<div class="card-header">
+<span class="card-title">📊 Current Harmonics &amp; Dead-Time FFT</span>
+<span style="font-size: 0.75rem; color: #f59e0b;">5th &amp; 7th Distortion</span>
+</div>
+<div class="card-body">
+<div class="canvas-container">
+<canvas height="200" id="fftCanvas" width="420"></canvas>
+</div>
+<div class="control-row">
+<span>Active Dead-Time Compensation:</span>
+<label class="toggle-switch">
+<input checked="" id="deadTimeToggle" type="checkbox"/>
+<span class="toggle-slider"></span>
+</label>
+</div>
+</div>
+</div><div class="card">
+<div class="card-header">
+<span class="card-title">🎛️ Speed Regulation &amp; Disturbance Injection</span>
+<span style="font-size: 0.75rem; color: #ec4899;">VLT / VACON Tuning</span>
+</div>
+<div class="card-body">
+<div class="control-row">
+<span>Target Speed (RPM):</span>
+<div class="slider-with-val">
+<input id="speedSlider" max="2000" min="100" step="50" type="range" value="1500"/>
+<span class="slider-val-readout" id="speedVal">1500 RPM</span>
+</div>
+</div>
+<div class="control-row">
+<span>Load Torque Disturbance TL (Nm):</span>
+<div class="slider-with-val">
+<input id="torqueSlider" max="18" min="0" step="0.5" type="range" value="5.0"/>
+<span class="slider-val-readout" id="torqueVal">5.0 Nm</span>
+</div>
+</div>
+<div class="control-row">
+<span>Sensorless Feedback Mode (SMO):</span>
+<label class="toggle-switch">
+<input id="sensorlessToggle" type="checkbox"/>
+<span class="toggle-slider"></span>
+</label>
+</div>
+<div class="control-row">
+<span>Load Impact Transient:</span>
+<button class="btn-action" id="stepLoadBtn">⚡ Inject +10 Nm Step Load</button>
+</div>
+<div style="background: #090e18; border: 1px solid #1e293b; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #94a3b8;">
+<strong>Sensorless Sliding Mode Observer:</strong> Reconstructs back-EMF vectors without mechanical encoders. Toggle sensorless feedback to drive the motor entirely via back-EMF flux estimation.
                 </div>
-                <div class="control-row">
-                    <span>Active Dead-Time Compensation:</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="deadTimeToggle" checked>
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- 4. Drive Parameter Controls -->
-        <div class="card">
-            <div class="card-header">
-                <span class="card-title">🎛️ Speed Regulation & Disturbance Injection</span>
-                <span style="font-size: 0.75rem; color: #ec4899;">VLT / VACON Tuning</span>
-            </div>
-            <div class="card-body">
-                <div class="control-row">
-                    <span>Target Speed (RPM):</span>
-                    <div class="slider-with-val">
-                        <input type="range" id="speedSlider" min="100" max="2000" step="50" value="1500">
-                        <span id="speedVal" class="slider-val-readout">1500 RPM</span>
-                    </div>
-                </div>
-
-                <div class="control-row">
-                    <span>Load Torque Disturbance TL (Nm):</span>
-                    <div class="slider-with-val">
-                        <input type="range" id="torqueSlider" min="0" max="18" step="0.5" value="5.0">
-                        <span id="torqueVal" class="slider-val-readout">5.0 Nm</span>
-                    </div>
-                </div>
-
-                <div class="control-row">
-                    <span>Sensorless Feedback Mode (SMO):</span>
-                    <label class="toggle-switch">
-                        <input type="checkbox" id="sensorlessToggle">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-
-                <div class="control-row">
-                    <span>Load Impact Transient:</span>
-                    <button id="stepLoadBtn" class="btn-action">⚡ Inject +10 Nm Step Load</button>
-                </div>
-
-                <div style="background: #090e18; border: 1px solid #1e293b; border-radius: 6px; padding: 10px; font-size: 0.8rem; color: #94a3b8;">
-                    <strong>Sensorless Sliding Mode Observer:</strong> Reconstructs back-EMF vectors without mechanical encoders. Toggle sensorless feedback to drive the motor entirely via back-EMF flux estimation.
-                </div>
-            </div>
-        </div>
-
-        <!-- 5. Speed Tracking & Torque Dynamics Strip-Chart -->
-        <div class="card" style="grid-column: 1 / -1;">
-            <div class="card-header">
-                <span class="card-title">📈 Dynamic Telemetry: Speed Tracking & Electromagnetic Torque Transient</span>
-                <span style="font-size: 0.75rem; color: #38bdf8;">60 FPS Real-Time Trace</span>
-            </div>
-            <div class="card-body">
-                <canvas id="chartCanvas" width="920" height="230"></canvas>
-            </div>
-        </div>
-    </main>
-
-    <!-- Footer -->
-    <footer style="text-align: center; padding: 20px; font-size: 0.8rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: 20px;">
-        Designed & Implemented by <strong>Jacob El-Omar</strong> | Aalborg University — Bachelor's Project in Electronic Engineering<br>
-        Inspired by modern Variable Frequency Drives (VFD) & Power Electronics R&D
+</div>
+</div><div class="card" style="grid-column: 1 / -1;">
+<div class="card-header">
+<span class="card-title">📈 Dynamic Telemetry: Speed Tracking &amp; Electromagnetic Torque Transient</span>
+<span style="font-size: 0.75rem; color: #38bdf8;">60 FPS Real-Time Trace</span>
+</div>
+<div class="card-body">
+<canvas height="230" id="chartCanvas" width="920"></canvas>
+</div>
+</div></div></main>
+<!-- Footer -->
+<footer style="text-align: center; padding: 20px; font-size: 0.8rem; color: #64748b; border-top: 1px solid #1e293b; margin-top: 20px;">
+        Designed &amp; Implemented by <strong>Jacob El-Omar</strong> | Aalborg University — Bachelor's Project in Electronic Engineering<br/>
+        Inspired by modern Variable Frequency Drives (VFD) &amp; Power Electronics R&amp;D
     </footer>
-
-    <script type="module" src="js/app.js"></script>
-
-    <div class="guide-modal-footer">
-                <button id="guideStart" class="btn-guide-start">🚀 Start Interactive Simulator</button>
-            </div>
-        </div>
-    </div>
-
-    
-
-
-
-    
-
-
-    
-
-    <script>
+<script src="js/app.js" type="module"></script>
+<div class="guide-modal-footer">
+<button class="btn-guide-start" id="guideStart">🚀 Start Interactive Simulator</button>
+</div>
+<script>
     (function() {
         const steps = [
     {
@@ -287,7 +263,17 @@
             if (targetEl) {
                 highlightedEl = targetEl;
                 targetEl.classList.add('tour-spotlight-active');
-                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                if (window.innerWidth <= 640) {
+                if (targetEl.closest('.live-sticky-screen')) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    const rect = targetEl.getBoundingClientRect();
+                    const desiredY = 220 + (window.innerHeight - 220 - 160) / 2;
+                    window.scrollBy({ top: rect.top - desiredY, behavior: 'smooth' });
+                }
+            } else {
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            }
                 setTimeout(() => positionCard(targetEl), 140);
             } else {
                 card.style.top = '50%';
@@ -370,11 +356,7 @@
         }
     })();
     </script>
-
-
-    
-
-    <script>
+<script>
     (function() {
         const steps = [
     {
@@ -583,29 +565,26 @@
         }
     })();
     </script>
-
 <!-- Interactive Guided Yellow Spotlight Tour Engine (Zero Blur) -->
-    <div class="tour-card" id="tourCard">
-        <div class="tour-badge-row">
-            <span class="tour-step-badge" id="tourStepBadge">Step 1 of 4</span>
-            <button class="tour-btn-skip" id="tourBtnSkip">✕ Skip Tour</button>
-        </div>
-        <h4 class="tour-action-title" id="tourTitle">Action Title</h4>
-        <div class="tour-happens-box" id="tourHappens"><strong>⚡ What Happens:</strong> Live reaction</div>
-        <div class="tour-why-box" id="tourWhy"><strong>💡 Why:</strong> Reason</div>
-        <div class="tour-footer">
-            <div class="tour-dots" id="tourDots"></div>
-            <div class="tour-controls">
-                <button class="btn-tour-nav btn-tour-prev" id="tourBtnPrev">⇦ Back</button>
-                <button class="btn-tour-nav btn-tour-next" id="tourBtnNext">Next ➔</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Floating Tour Launcher Pill -->
-    <button class="btn-tour-launcher" id="btnTourLauncher">🎮 Guided Tour</button>
-
-    <script>
+<div class="tour-card" id="tourCard">
+<div class="tour-badge-row">
+<span class="tour-step-badge" id="tourStepBadge">Step 1 of 4</span>
+<button class="tour-btn-skip" id="tourBtnSkip">✕ Skip Tour</button>
+</div>
+<h4 class="tour-action-title" id="tourTitle">Action Title</h4>
+<div class="tour-happens-box" id="tourHappens"><strong>⚡ What Happens:</strong> Live reaction</div>
+<div class="tour-why-box" id="tourWhy"><strong>💡 Why:</strong> Reason</div>
+<div class="tour-footer">
+<div class="tour-dots" id="tourDots"></div>
+<div class="tour-controls">
+<button class="btn-tour-nav btn-tour-prev" id="tourBtnPrev">⇦ Back</button>
+<button class="btn-tour-nav btn-tour-next" id="tourBtnNext">Next ➔</button>
+</div>
+</div>
+</div>
+<!-- Floating Tour Launcher Pill -->
+<button class="btn-tour-launcher" id="btnTourLauncher">🎮 Guided Tour</button>
+<script>
     (function() {
         const steps = [
     {
